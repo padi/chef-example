@@ -1,0 +1,31 @@
+<VirtualHost *:80>
+  ServerName brisbane.foodconnect.com.au
+  ServerAlias brisbane.foodconnect.com.au
+
+  # Point this to your public folder of teambox
+  DocumentRoot /data/foodc/current/public
+
+  RewriteEngine On
+
+  <Proxy balancer://unicornservers>
+    BalancerMember http://127.0.0.1:5000
+  </Proxy>
+
+  # Redirect all non-static requests to thin
+  RewriteCond %{DOCUMENT_ROOT}/%{REQUEST_FILENAME} !-f
+  RewriteRule ^/(.*)$ balancer://unicornservers%{REQUEST_URI} [P,QSA,L]
+
+  ProxyPass / balancer://unicornservers/
+  ProxyPassReverse / balancer://unicornservers/
+  ProxyPreserveHost on
+
+  <Proxy *>
+    Order deny,allow
+    Allow from all
+  </Proxy>
+
+  # Custom log file locations
+  ErrorLog  /data/foodc/current/log/error.log
+  CustomLog  /data/foodc/current/log/access.log combined
+
+</VirtualHost>

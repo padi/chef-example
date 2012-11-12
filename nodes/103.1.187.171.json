@@ -1,0 +1,7 @@
+{
+  "run_list": [
+    "recipe[git]",
+    "recipe[rails_setup]",
+    "recipe[apache_unicorn]"
+  ]
+}
